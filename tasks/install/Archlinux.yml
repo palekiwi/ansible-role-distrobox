@@ -1,0 +1,6 @@
+---
+- name: Ensure distrobox is installed.
+  become: true
+  community.general.pacman:
+    name: distrobox
+    state: present
