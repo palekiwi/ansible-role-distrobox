@@ -1,0 +1,20 @@
+---
+dependencies: []
+
+collections:
+  - community.general
+  - containers.podman
+
+galaxy_info:
+  role_name: distrobox
+  author: palekiwi
+  description: Install distrobox and run a container.
+  license: "license (BSD, MIT)"
+  min_ansible_version: "2.10"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - distrobox
+    - podman

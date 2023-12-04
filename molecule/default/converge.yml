@@ -1,0 +1,14 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    distrobox_create_name: test
+    distrobox_create_image_name: archlinux
+    distrobox_create_image_tag: latest
+    distrobox_systemd_enabled: true
+
+  tasks:
+    - name: "Include palekiwi.distrobox"
+      ansible.builtin.include_role:
+        name: "palekiwi.distrobox"

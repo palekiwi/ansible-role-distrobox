@@ -1,0 +1,4 @@
+---
+# handlers file for distrobox
+- name: Build custom image.
+  ansible.builtin.include_tasks: tasks/build.yml

@@ -1,0 +1,68 @@
+- name: Check if Kubic repo has been added.
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/libcontainers.list
+  register: libcontainers
+
+- name: Ensure Kubic repo is enabled.
+  when: not libcontainers.stat.exists
+  become: true
+  block:
+    - name: Download the key.
+      ansible.builtin.get_url:
+        url: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/\
+              Debian_{{ ansible_facts['distribution_major_version'] }}/Release.key"
+        dest: /tmp/Release.key
+        mode: "0644"
+        owner: root
+
+    - name: Ensure gpg is installed.
+      ansible.builtin.apt:
+        name: gpg
+        state: present
+
+    - name: Dearmor the key
+      ansible.builtin.command:
+        cmd: "gpg -o /tmp/libcontainers.gpg --dearmor /tmp/Release.key"
+        creates: "/tmp/Release.gpg"
+
+    - name: Copy the key into /usr/share/keyrings.
+      ansible.builtin.copy:
+        remote_src: true
+        src: /tmp/libcontainers.gpg
+        dest: /usr/share/keyrings
+        mode: "0644"
+        owner: root
+
+    - name: Add Kubic repo.
+      ansible.builtin.apt_repository:
+        repo: >
+          deb [signed-by=/usr/share/keyrings/libcontainers.gpg]
+          https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_{{ ansible_facts['distribution_major_version'] }}/ /
+        state: present
+        filename: libcontainers
+
+- name: Ensure podman is installed.
+  become: true
+  ansible.builtin.apt:
+    name: podman
+    state: present
+
+- name: Check if Distrobox is present.
+  ansible.builtin.stat:
+    path: "~/.local/bin/distrobox"
+  register: distrobox_bin
+  changed_when: false
+
+- name: Install Distrobox.
+  when: not distrobox_bin.stat.exists
+  block:
+    - name: Download installation script.
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/89luca89/distrobox/main/install"
+        mode: "0744"
+        dest: "/tmp/install"
+
+    - name: Run installation script.
+      ansible.builtin.command:
+        cmd: "sh /tmp/install --prefix ~/.local"
+      changed_when: true
