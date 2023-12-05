@@ -1,5 +1,19 @@
 - name: Install distrobox.
+  when: ansible_distribution != 'Fedora'
   become: true
   ansible.builtin.dnf:
     name: distrobox
     state: present
+
+- name: Ensure distrobox has already been installed on Fedora Silverblue.
+  when: ansible_distribution == 'Fedora'
+  block:
+    - name: Check if distrobox is already installed.
+      ansible.builtin.stat:
+        path: /usr/bin/distrobox
+      register: stat_distrobox
+
+    - name: Fail if distrobox is not installed.
+      when: not stat_distrobox.stat.exists
+      ansible.builtin.fail:
+        msg: "distrobox is not installed."
